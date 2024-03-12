@@ -20,14 +20,14 @@ $ ./script.sh
 
 # Usage
 
-First, please upload image files.
-The format is JPEG or PNG and each file is limited to 20 MB.
+First, upload your image files.
+The format is JPEG or PNG, and each file can be up to 20 MB.
 Large images will be automatically scaled down.
 You may upload multiple files.
 
 ![alt text](img/usage_1.png)
 
-Next, ask a question about the images,
-and Gemini will return a message.
+Next, ask a question about the image,
+Gemini will then return a message.
 
 ![alt text](img/usage_2.png)

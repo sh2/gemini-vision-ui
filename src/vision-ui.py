@@ -17,7 +17,7 @@ def main():
 
     st.title("Gemini Pro Vision UI")
     files = st.file_uploader(
-        "First, please upload image files", accept_multiple_files=True, type=["jpeg", "jpg", "png"])
+        "Please upload image files", accept_multiple_files=True, type=["jpeg", "jpg", "png"])
 
     if files:
         # Display image files in two columns
