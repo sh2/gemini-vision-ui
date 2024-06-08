@@ -1,6 +1,6 @@
 # gemini-vision-ui
 
-Simple Web UI to try out Gemini Pro Vision.
+Simple Web UI to try out Gemini Vision.
 
 # Setup
 
