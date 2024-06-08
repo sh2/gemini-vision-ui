@@ -56,7 +56,9 @@ def main():
                 contents=prompts,
                 stream=True
             ):
-                response += response_chunk.text
+                for response_part in response_chunk.parts:
+                    response += response_part.text
+
                 message_assiatant.markdown(response + "▌")
 
         message_assiatant.markdown(response)
