@@ -12,7 +12,7 @@ def main():
     )
 
     gemini_model = google.generativeai.GenerativeModel(
-        os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+        os.environ.get("GEMINI_MODEL") or "gemini-1.5-flash"
     )
 
     st.title("Gemini Vision UI")
