@@ -12,10 +12,10 @@ def main():
     )
 
     gemini_model = google.generativeai.GenerativeModel(
-        os.environ.get("GEMINI_MODEL", "gemini-pro-vision")
+        os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
     )
 
-    st.title("Gemini Pro Vision UI")
+    st.title("Gemini Vision UI")
     files = st.file_uploader(
         "Please upload image files", accept_multiple_files=True, type=["jpeg", "jpg", "png"])
 
