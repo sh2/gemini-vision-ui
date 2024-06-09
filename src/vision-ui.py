@@ -11,11 +11,18 @@ def main():
         transport="rest"
     )
 
-    gemini_model = google.generativeai.GenerativeModel(
-        os.environ.get("GEMINI_MODEL") or "gemini-1.5-flash"
-    )
-
     st.title("Gemini Vision UI")
+
+    model_options = ["gemini-1.5-pro",
+                     "gemini-1.5-flash", "gemini-pro-vision"]
+
+    model_code = st.selectbox("Language Model", model_options)
+
+    if not model_code:
+        model_code = model_options[0]
+
+    gemini_model = google.generativeai.GenerativeModel(model_code)
+
     files = st.file_uploader(
         "Please upload image files", accept_multiple_files=True, type=["jpeg", "jpg", "png"])
 
