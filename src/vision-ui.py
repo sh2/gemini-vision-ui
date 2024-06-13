@@ -13,8 +13,7 @@ def main():
 
     st.title("Gemini Vision UI")
 
-    model_options = ["gemini-1.5-pro",
-                     "gemini-1.5-flash", "gemini-pro-vision"]
+    model_options = ["gemini-1.5-pro", "gemini-1.5-flash"]
 
     model_code = st.selectbox("Language Model", model_options)
 
