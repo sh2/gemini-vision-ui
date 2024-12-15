@@ -25,10 +25,11 @@ def main():
         "gemini-1.5-flash-latest",
         "gemini-1.5-flash-8b-latest",
         "gemini-exp-1121",
-        "gemini-exp-1206"
+        "gemini-exp-1206",
+        "gemini-2.0-flash-exp"
     ]
 
-    model_code = st.selectbox("Language Model", model_options, index=7)
+    model_code = st.selectbox("Language Model", model_options, index=8)
 
     if not model_code:
         model_code = model_options[0]
@@ -56,9 +57,23 @@ def main():
         if pasted_image:
             st.image(pasted_image)
 
+    clear = st.button("Clear Chat History")
+
+    if clear or "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Display chat history
+    for message in st.session_state.messages:
+        role = "assistant" if message["role"] == "model" else message["role"]
+        with st.chat_message(role):
+            st.markdown(message["parts"][0])
+
     # Accept messages from the user
     if prompt := st.chat_input("Please enter a question about the images"):
-        response = "Please upload image files."
+        st.session_state.messages.append({"role": "user", "parts": [prompt]})
+        prompts = []
+        images = []
+        response = ""
 
         # Display user's message
         with st.chat_message("user"):
@@ -68,8 +83,7 @@ def main():
         with st.chat_message("assistant"):
             message_assiatant = st.empty()
 
-        images = []
-
+        # Prepare image files
         if upload_method == "Upload image files":
             if files:
                 images = [PIL.Image.open(file) for file in files]
@@ -83,22 +97,28 @@ def main():
                 image = PIL.Image.open(io.BytesIO(image_binary))
                 images = [image]
 
-        if images:
-            prompts = []
-            prompts.append(prompt)
-            prompts.extend(images)
-            response = ""
+        # Add the first message
+        parts = st.session_state.messages[0]["parts"]
+        parts.extend(images)
+        prompts.append({"role": "user", "parts": parts})
 
-            for response_chunk in gemini_model.generate_content(
-                contents=prompts,
-                stream=True
-            ):
-                for response_part in response_chunk.parts:
-                    response += response_part.text
+        # Add the second and subsequent messages
+        for message in st.session_state.messages[1:]:
+            prompts.append(message)
 
-                message_assiatant.markdown(response + "▌")
+        for response_chunk in gemini_model.generate_content(
+            contents=prompts,
+            stream=True
+        ):
+            for response_part in response_chunk.parts:
+                response += response_part.text
+
+            message_assiatant.markdown(response + "▌")
 
         message_assiatant.markdown(response)
+
+        st.session_state.messages.append(
+            {"role": "model", "parts": [response]})
 
 
 if __name__ == "__main__":
