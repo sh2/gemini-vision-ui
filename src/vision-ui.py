@@ -24,12 +24,12 @@ def main():
         "gemini-1.5-pro-latest",
         "gemini-1.5-flash-latest",
         "gemini-1.5-flash-8b-latest",
-        "gemini-exp-1121",
         "gemini-exp-1206",
-        "gemini-2.0-flash-exp"
+        "gemini-2.0-flash-exp",
+        "gemini-2.0-flash-thinking-exp"
     ]
 
-    model_code = st.selectbox("Language Model", model_options, index=8)
+    model_code = st.selectbox("Language Model", model_options, index=7)
 
     if not model_code:
         model_code = model_options[0]
