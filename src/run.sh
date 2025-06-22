@@ -1,6 +1,6 @@
 #!/bin/bash
 
-streamlit run vision-ui.py \
+exec streamlit run vision-ui.py \
     --browser.gatherUsageStats=false \
     --server.baseUrlPath=/vision-gemini \
     --server.maxUploadSize 20 \
