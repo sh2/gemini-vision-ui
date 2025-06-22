@@ -1,35 +1,28 @@
 import base64
-import google.generativeai
 import io
 import os
-import streamlit as st
 import PIL.Image
+import streamlit as st
 
+from google import genai
+from google.genai.types import Content, Part
 from st_img_pastebutton import paste as paste_image
 
 
 def main():
-    # gRPC does not support SOCKS5 proxy, so use REST
-    google.generativeai.configure(
-        api_key=os.environ.get("GEMINI_API_KEY", ""),
-        transport="rest"
-    )
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
     st.title("Gemini Vision UI")
 
     model_options = [
-        "gemini-2.0-flash",
-        "gemini-2.0-flash-lite",
-        "gemini-2.5-pro-exp-03-25",
-        "gemini-2.5-flash-preview-04-17"
+        "gemini-2.5-pro",
+        "gemini-2.5-flash"
     ]
 
-    model_code = st.selectbox("Language Model", model_options, index=0)
+    model_id = st.selectbox("Language model", model_options, index=1)
 
-    if not model_code:
-        model_code = model_options[0]
-
-    gemini_model = google.generativeai.GenerativeModel(model_code)
+    if not model_id:
+        model_id = model_options[0]
 
     upload_method = st.radio("Select upload method", [
                              "Upload image files", "Paste from Clipboard"])
@@ -61,13 +54,13 @@ def main():
     for message in st.session_state.messages:
         role = "assistant" if message["role"] == "model" else message["role"]
         with st.chat_message(role):
-            st.markdown(message["parts"][0])
+            st.markdown(message["parts"])
 
     # Accept messages from the user
     if prompt := st.chat_input("Please enter a question about the images"):
-        st.session_state.messages.append({"role": "user", "parts": [prompt]})
-        prompts = []
+        st.session_state.messages.append({"role": "user", "parts": prompt})
         images = []
+        contents = []
         response = ""
 
         # Display user's message
@@ -82,38 +75,54 @@ def main():
         if upload_method == "Upload image files":
             if files:
                 images = [PIL.Image.open(file) for file in files]
-
-                # Large images are resized to 2048x2048
-                for image in images:
-                    image.thumbnail((2048, 2048))
         else:
             if pasted_image:
                 image_binary = base64.b64decode(pasted_image.split(",")[1])
                 image = PIL.Image.open(io.BytesIO(image_binary))
                 images = [image]
 
+        # Large images are resized to 2048x2048
+        for image in images:
+            image.thumbnail((2048, 2048))
+
         # Add the first message
-        parts = st.session_state.messages[0]["parts"]
-        parts.extend(images)
-        prompts.append({"role": "user", "parts": parts})
+        parts = []
+
+        for image in images:
+            img_byte_arr = io.BytesIO()
+            image.convert("RGB").save(img_byte_arr, format='JPEG')
+            img_byte_arr = img_byte_arr.getvalue()
+
+            parts.append(
+                Part.from_bytes(
+                    data=img_byte_arr,
+                    mime_type="image/jpeg"
+                )
+            )
+
+        parts.append(Part.from_text(
+            text=st.session_state.messages[0]["parts"]))
+
+        contents.append(Content(role="user", parts=parts))
 
         # Add the second and subsequent messages
         for message in st.session_state.messages[1:]:
-            prompts.append(message)
+            contents.append(
+                Content(role=message["role"], parts=[Part.from_text(text=message["parts"])]))
 
-        for response_chunk in gemini_model.generate_content(
-            contents=prompts,
-            stream=True
+        for response_chunk in client.models.generate_content_stream(
+            model=model_id,
+            contents=contents,
         ):
-            for response_part in response_chunk.parts:
-                response += response_part.text
+            if response_chunk.text:
+                response += response_chunk.text
 
             message_assiatant.markdown(response + "▌")
 
         message_assiatant.markdown(response)
 
         st.session_state.messages.append(
-            {"role": "model", "parts": [response]})
+            {"role": "model", "parts": response})
 
 
 if __name__ == "__main__":
