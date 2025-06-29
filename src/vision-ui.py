@@ -3,7 +3,6 @@ import io
 import os
 import PIL.Image
 import streamlit as st
-
 from google import genai
 from google.genai.types import Content, Part
 from st_img_pastebutton import paste as paste_image
@@ -22,7 +21,7 @@ def main():
     model_id = st.selectbox("Language model", model_options, index=1)
 
     if not model_id:
-        model_id = model_options[0]
+        model_id = model_options[1]
 
     upload_method = st.radio("Select upload method", [
                              "Upload image files", "Paste from Clipboard"])
@@ -116,8 +115,7 @@ def main():
         ):
             if response_chunk.text:
                 response += response_chunk.text
-
-            message_assiatant.markdown(response + "▌")
+                message_assiatant.markdown(response + "▌")
 
         message_assiatant.markdown(response)
 
