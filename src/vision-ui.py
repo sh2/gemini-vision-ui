@@ -1,5 +1,6 @@
 import base64
 import io
+import json
 import os
 import PIL.Image
 import streamlit as st
@@ -113,6 +114,8 @@ def main():
             model=model_id,
             contents=contents,
         ):
+            last_chunk = response_chunk
+
             if response_chunk.text:
                 response += response_chunk.text
                 message_assiatant.markdown(response + "▌")
@@ -121,6 +124,8 @@ def main():
 
         st.session_state.messages.append(
             {"role": "model", "parts": response})
+
+        print(json.dumps(last_chunk.model_dump(), indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
